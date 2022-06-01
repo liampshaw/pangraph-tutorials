@@ -78,4 +78,6 @@ The script `make-plot-kpc.sh` puts all these together:
 ./scripts/make-plot-kpc.sh data/kpc/pangraph_kpc_u10k_d5k
 ```
 
+![](images/pangraph-kpc-plot.png)
+
 N.B. Because the block colours are random, there is a specified seed in the `readGFA` function of `scripts/prepare-pangraph-gfa.py` to make this reproducible. You can alter that seed if the colours aren't working for you.
