@@ -56,7 +56,7 @@ genome.blocks.unique$genome.n <- sapply(genome.blocks.unique$n.reps, function(x)
 p.blocks <- ggplot(genome.blocks.unique, aes(xmin = new.start, xmax = new.end, forward = forward, y = genome, fill = block.coloured)) +
   geom_gene_arrow(arrow_body_height = unit(2, "mm"), 
                   arrowhead_height = unit(2, "mm"),
-                  arrowhead_width = unit(0.5, "mm")) +
+                  arrowhead_width = unit(0.1, "mm")) +
   theme_genes()+
   scale_fill_manual(values=block.colours)+
   ylab("")+

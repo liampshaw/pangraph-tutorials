@@ -80,4 +80,15 @@ The script `make-plot-kpc.sh` puts all these together:
 
 ![](images/pangraph-kpc-plot.png)
 
+Here each block has a random colour. If a block only appears in a single contig, it is grey. If you pick a genome on the left of the plot, you should be able to follow its path through the graph representation on the right using the colours. KPC is on the purple block (centred at position 0).
+
 N.B. Because the block colours are random, there is a specified seed in the `readGFA` function of `scripts/prepare-pangraph-gfa.py` to make this reproducible. You can alter that seed if the colours aren't working for you.
+
+## Gene annotations
+
+So far we have not used any information about gene annotations.
+
+To do:
+* Provide a gff of annotations and show the location of KPC and different insertion sequences.
+* Compare to the Tn4401 transposon background.
+* Include the positional entropy. 
