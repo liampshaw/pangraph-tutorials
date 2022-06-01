@@ -12,7 +12,7 @@ python scripts/prepare-pangraph-gfa.py "$baseFile".gfa
 
 # Bandage plot
 echo "Plotting Bandage graph plot..."
-/Applications/Bandage.app/Contents/MacOS/Bandage image "$baseFile".gfa.coloured.gfa "$baseFile".gfa.png --height 5000 --width 5000 --colour custom
+/Applications/Bandage.app/Contents/MacOS/Bandage image "$baseFile".gfa.coloured.gfa "$baseFile".gfa.png --height 3000 --width 5000 --colour custom
 
 # R plot
 echo "Plotting linearized blocks..."
