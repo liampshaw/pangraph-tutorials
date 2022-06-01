@@ -63,13 +63,19 @@ This makes three output files in `data/kpc`
 We can then plot a graph with Bandage. Using the `--colour custom` flag will use the block colours we have added.
 
 ```
-Bandage image data/kpc/pangraph_kpc_u10k_d5k.gfa.coloured.gfa data/kpc/pangraph_kpc_u10k_d5k.gfa.png --height 400 --width 7000 --colour custom
+Bandage image data/kpc/pangraph_kpc_u10k_d5k.gfa.coloured.gfa \
+	data/kpc/pangraph_kpc_u10k_d5k.gfa.png \
+	--height 400 --width 7000 \
+	--colour custom
 ```
 
 We can now plot the blocks in a linear fashion with an R script, using the same colours.
 
 ```
-Rscript scripts/plot-blocks.R data/kpc/pangraph_kpc_u10k_d5k.gfa.blocks.csv $geneBlock data/kpc/pangraph_kpc_u10k_d5k.gfa.png data/kpc/pangraph_kpc_plot.pdf
+Rscript scripts/plot-blocks.R \
+	data/kpc/pangraph_kpc_u10k_d5k.gfa.blocks.csv \
+	$geneBlock data/kpc/pangraph_kpc_u10k_d5k.gfa.png \
+	data/kpc/pangraph_kpc_plot.pdf
 ```
 
 The script `make-plot-kpc.sh` puts all these together:
@@ -91,4 +97,4 @@ So far we have not used any information about gene annotations.
 To do:
 * Provide a gff of annotations and show the location of KPC and different insertion sequences.
 * Compare to the Tn4401 transposon background.
-* Include the positional entropy. 
+* Include the positional entropy.
