@@ -1,6 +1,10 @@
 library(ggplot2)
 library(cowplot)
 library(gggenes)
+library(ggdendro)
+library(reshape2)
+library(vegan)
+
 args = commandArgs(trailingOnly=TRUE)
 # 1 - gfa csv
 # 2 - name of block with gene in (for centering)
@@ -52,8 +56,18 @@ genome.blocks.unique$genome.path.name <- paste0("Type", as.numeric(as.factor(gen
 genome.blocks.unique$genome.n <- sapply(genome.blocks.unique$n.reps, function(x) ifelse(x==1, 
                                         "", paste0("n=", x)))
 
+# Now use a dendrogram to order the genomes
+m <- acast(genome ~ block, data=genome.blocks.unique, fill=0, fun.aggregate=length)
+print(m)
+#m.dist <- dist(m, method = "euclidean")
+m.dist <- vegdist(m, method="jaccard") # jaccard distances based on block presence/absence
+dendro <- as.dendrogram(hclust(m.dist))
+dendro_order <- order.dendrogram(dendro)
+genome_labels <- dendro_data(dendro)$labels$label
+genome.blocks.unique$genome.ordered <- ordered(genome.blocks.unique$genome, 
+                                             levels=genome_labels)
 
-p.blocks <- ggplot(genome.blocks.unique, aes(xmin = new.start, xmax = new.end, forward = forward, y = genome, fill = block.coloured)) +
+p.blocks <- ggplot(genome.blocks.unique, aes(xmin = new.start, xmax = new.end, forward = forward, y = genome.ordered, fill = block.coloured)) +
   geom_gene_arrow(arrow_body_height = unit(2, "mm"), 
                   arrowhead_height = unit(2, "mm"),
                   arrowhead_width = unit(0.1, "mm")) +
@@ -61,7 +75,7 @@ p.blocks <- ggplot(genome.blocks.unique, aes(xmin = new.start, xmax = new.end, f
   scale_fill_manual(values=block.colours)+
   ylab("")+
   theme(legend.position = "none")+
-  scale_y_discrete(breaks=genome.blocks.unique$genome, labels=genome.blocks.unique$genome.n)+
+  scale_y_discrete(breaks=genome.blocks.unique$genome.ordered, labels=genome.blocks.unique$genome.n)+
   ggtitle("Linearized blocks")+
   theme(plot.title=element_text(hjust=0.5))
 #graph_file <- system.file("extdata", "../graph-10k-5k.jpg", package = "cowplot")
