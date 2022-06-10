@@ -58,7 +58,6 @@ genome.blocks.unique$genome.n <- sapply(genome.blocks.unique$n.reps, function(x)
 
 # Now use a dendrogram to order the genomes
 m <- acast(genome ~ block, data=genome.blocks.unique, fill=0, fun.aggregate=length)
-print(m)
 #m.dist <- dist(m, method = "euclidean")
 m.dist <- vegdist(m, method="jaccard") # jaccard distances based on block presence/absence
 dendro <- as.dendrogram(hclust(m.dist))
