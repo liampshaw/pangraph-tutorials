@@ -65,14 +65,15 @@ genome.blocks.unique$genome.ordered <- ordered(genome.blocks.unique$genome,
 p.blocks <- ggplot(genome.blocks.unique, aes(xmin = new.start, xmax = new.end, forward = forward, y = genome.ordered, fill = block.coloured)) +
   geom_gene_arrow(arrow_body_height = unit(2, "mm"),
                   arrowhead_height = unit(2, "mm"),
-                  arrowhead_width = unit(2, "mm")) +
+                  arrowhead_width = unit(1, "mm")) +
   theme_genes()+
   scale_fill_manual(values=block.colours)+
   ylab("")+
   theme(legend.position = "none")+
   scale_y_discrete(breaks=genome.blocks.unique$genome.ordered, labels=genome.blocks.unique$genome.n)+
   ggtitle("Linearized blocks")+
-  theme(plot.title=element_text(hjust=0.5))
+  theme(plot.title=element_text(hjust=0.5))+
+  xlab("Position (bp)")
 # Include the bandage graph plot
 p.graph <- ggdraw() + draw_image(args[3])+
   ggtitle("Graph representation")+
