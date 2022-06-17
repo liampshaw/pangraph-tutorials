@@ -5,7 +5,14 @@ import sys
 from random import seed
 
 
-def readGFA(gfa_file, colour_seed=9999):
+def get_options():
+    parser = argparse.ArgumentParser(description='make a coloured version of pangraph gfa')
+    parser.add_argument('input_file', nargs='+', help='Input gfa', required=True)
+    parser.add_argument('--all', '-a', help='colour all blocks (even unique ones)',
+                    action='store_true')
+    return parser.parse_args()
+
+def readGFA(gfa_file, colour_seed=1789, colour_all=True):
     """Reads in a gfa and returns useful format."""
     output_blocks=gfa_file+".blocks.csv"
     block_colour_file=gfa_file+".colours.csv"
@@ -32,14 +39,17 @@ def readGFA(gfa_file, colour_seed=9999):
                 genome_dict[entries[1].strip('\n')] = new_path
     # Create random colours
     block_colour_dict = {}
-    block_num = len([x for x in block_count_dict.values() if x>1])
+    if colour_all==False:
+        block_num = len([x for x in block_count_dict.values() if x>1])
+    elif colour_all==True:
+        block_num = len([x for x in block_count_dict.values()])
     block_colors = []
     seed(colour_seed) # for random colours
     for i in range(block_num):
         block_colors.append("#%06X" % randint(0, 0xFFFFFF))
     i = 0
     for block, count in block_count_dict.items():
-        if count==1:
+        if count==1 and colour_all==False:
             block_colour_dict[block] = "#BDBABA" # colour grey
         else:
             block_colour_dict[block] = block_colors[i]
@@ -51,9 +61,9 @@ def readGFA(gfa_file, colour_seed=9999):
                 block = v[0]
                 output_f.write("%s\n" % (g+","+','.join([str(x) for x in v])+","+block_colour_dict[block]))
     with open(block_colour_file, 'w') as output_f_colours:
-        output_f_colours.write("block,colour\n")
+        output_f_colours.write("block,colour,length\n")
         for block, colour in block_colour_dict.items():
-            output_f_colours.write("%s,%s\n" % (block, colour))
+            output_f_colours.write("%s,%s,%s\n" % (block, colour, str(node_dict[block])))
 
 def rewriteGFA(gfa_file, colour_file, new_gfa_file):
     """Rewrites a GFA with colours."""
@@ -70,9 +80,15 @@ def rewriteGFA(gfa_file, colour_file, new_gfa_file):
                 new_gfa.write("%s\n" % "\t".join(entries))
 
 
-input_gfa = sys.argv[1]
-readGFA(input_gfa)
-rewriteGFA(input_gfa,
+def main():
+    args = get_options()
+    input_gfa = args.input_file
+    colour_all_blocks = args.all
+    readGFA(input_gfa, colour_all_blocks)
+    rewriteGFA(input_gfa,
         input_gfa+".colours.csv",
         input_gfa+".coloured.gfa")
 
+
+if __name__ == "__main__":
+    main()
