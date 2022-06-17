@@ -1,10 +1,10 @@
-library(ggplot2)
-library(cowplot)
-library(gggenes)
-library(ggdendro)
-library(reshape2)
-library(vegan)
-library(ggrepel)
+require(ggplot2)
+require(cowplot)
+require(gggenes)
+require(ggdendro)
+require(reshape2)
+require(vegan)
+require(ggrepel)
 
 args = commandArgs(trailingOnly=TRUE)
 # Arguments: 
