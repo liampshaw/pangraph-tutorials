@@ -85,7 +85,6 @@ def main():
     args = get_options()
     input_gfa = str(args.input_file)
     colour_all_blocks = args.all
-    print(colour_all_blocks)
     readGFA(input_gfa, colour_all_blocks)
     rewriteGFA(input_gfa,
         input_gfa+".colours.csv",
