@@ -69,7 +69,6 @@ p.blocks <- ggplot(genome.blocks.unique, aes(xmin = new.start, xmax = new.end, f
   theme_genes()+
   scale_fill_manual(values=block.colours)+
   ylab("")+
-  xlab("Position (bp)")+
   theme(legend.position = "none")+
   scale_y_discrete(breaks=genome.blocks.unique$genome.ordered, labels=genome.blocks.unique$genome.n)+
   ggtitle("Linearized blocks")+
