@@ -3,16 +3,17 @@ import re
 from random import randint
 import sys
 from random import seed
+import argparse
 
 
 def get_options():
     parser = argparse.ArgumentParser(description='make a coloured version of pangraph gfa')
-    parser.add_argument('input_file', nargs='+', help='Input gfa', required=True)
+    parser.add_argument('input_file', help='Input gfa', type=str)
     parser.add_argument('--all', '-a', help='colour all blocks (even unique ones)',
                     action='store_true')
     return parser.parse_args()
 
-def readGFA(gfa_file, colour_seed=1789, colour_all=True):
+def readGFA(gfa_file, colour_all=True, colour_seed=1789):
     """Reads in a gfa and returns useful format."""
     output_blocks=gfa_file+".blocks.csv"
     block_colour_file=gfa_file+".colours.csv"
@@ -41,7 +42,7 @@ def readGFA(gfa_file, colour_seed=1789, colour_all=True):
     block_colour_dict = {}
     if colour_all==False:
         block_num = len([x for x in block_count_dict.values() if x>1])
-    elif colour_all==True:
+    if colour_all==True:
         block_num = len([x for x in block_count_dict.values()])
     block_colors = []
     seed(colour_seed) # for random colours
@@ -82,8 +83,9 @@ def rewriteGFA(gfa_file, colour_file, new_gfa_file):
 
 def main():
     args = get_options()
-    input_gfa = args.input_file
+    input_gfa = str(args.input_file)
     colour_all_blocks = args.all
+    print(colour_all_blocks)
     readGFA(input_gfa, colour_all_blocks)
     rewriteGFA(input_gfa,
         input_gfa+".colours.csv",
