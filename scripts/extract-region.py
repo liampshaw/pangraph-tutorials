@@ -21,6 +21,7 @@ def get_options():
     parser.add_argument('--upstream', help='upstream bases', default=2500, required=False)
     parser.add_argument('--downstream', help='downstream bases', default=2500, required=False)
     parser.add_argument('--complete', help='only keep contigs with all requested region', action='store_true')
+    parser.add_argument('--circular', help='whether input contigs are circular', action='store_true')
     return parser.parse_args()
 
 def reverse_complement(seq):
@@ -118,10 +119,11 @@ def main():
     input_fasta = args.input
     output_fasta = args.output
     gene_fasta = args.gene
+    are_circular = args.circular
     # Get length of gene
     gene_seq = read_fasta(gene_fasta)
     if len(gene_seq)>1:
-        print('Your gene of interest has more than one sequence! Check the fasta.')
+        print('Your gene of interest has more than one occurrence in an input sequence! Check the fasta.')
         exit()
     else:
         gene_length = [len(str(gene_seq[v].seq)) for v in gene_seq][0]
