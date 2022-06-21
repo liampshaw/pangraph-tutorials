@@ -10,6 +10,7 @@ import re
 import logging
 import numpy as np
 import argparse
+import glob
 
 
 def get_options():
@@ -84,9 +85,7 @@ def blast_search(query_fasta, db_fasta):
     blast_output = re.split('\n|\t',blast_out.decode()) # Decode
     #print(blast_output)
     logging.debug('\nRemoving temporary blast databases...')
-    os.remove(db_fasta+'.nin')
-    os.remove(db_fasta+'.nhr')
-    os.remove(db_fasta+'.nsq')
+    [os.remove(x) for x in glob.glob(db_fasta+'.n*')]
     # Looking through to cut out upstream region
     if blast_output == ['']:
         logging.debug('\nNo blast hit for gene!')
@@ -99,31 +98,36 @@ def blast_search(query_fasta, db_fasta):
         results_dict = {result[1]: [int(result[8]), int(result[9])] for result in blast_results if result[1] in contigs_one_hit} # only keep contigs with exactly one hit
         return(results_dict)
 
-def extract_regions(starting_fasta, blast_hits, is_circular=False, upstream_bases=1000, downstream_bases=1000):
+def extract_regions(starting_fasta, blast_hits, gene_length, is_circular=False, upstream_bases=1000, downstream_bases=1000):
     '''extracts the regions from a fasta file'''
     sequences = read_fasta(starting_fasta)
     extracted_seqs = {}
     for seq_id, coords in blast_hits.items():
         contig_seq = str(sequences[seq_id].seq)
         # Check the length
-        if len(contig_seq)<(upstream_bases+downstream_bases):
-            print('Contig '+seq_id+' is shorter than upstream+downstream region requested - be careful!')
+        if len(contig_seq)<(upstream_bases+downstream_bases+gene_length):
+            print('WARNING: Contig '+seq_id+' is shorter than flanking region requested!')
+            if coords[0]<coords[1]:
+                extracted_seqs[seq_id] = contig_seq
+            elif coords[0]>coords[1]:
+                extracted_seqs[seq_id] = reverse_complement(contig_seq)
         #print(region_seq)
-        triplicate_seq = contig_seq+contig_seq+contig_seq
-        if coords[0]<coords[1]: # positive strand
-            if not is_circular:
-                limits = [max(0, coords[0]-1-upstream_bases), min(coords[1]+downstream_bases, len(contig_seq))]
-                extracted_seqs[seq_id] = contig_seq[limits[0]:limits[1]]
-            elif is_circular:
-                limits = [max(coords[1], coords[0]-1-upstream_bases+len(contig_seq)), min(coords[0]+2*len(contig_seq), coords[1]+downstream_bases+len(contig_seq))]
-                extracted_seqs[seq_id] = triplicate_seq[limits[0]:limits[1]]
-        elif coords[0]>coords[1]: # negative strand
-            if not is_circular: # also put in a max thing here
-                limits = [max(0, coords[1]-1-downstream_bases), min(coords[0]+upstream_bases, len(contig_seq))]
-                extracted_seqs[seq_id] = reverse_complement(contig_seq[limits[0]:limits[1]])
-            elif is_circular:
-                limits = [max(coords[0], coords[1]-1-downstream_bases+len(contig_seq)), min(coords[1]+2*len(contig_seq), coords[0]+upstream_bases+len(contig_seq))]
-                extracted_seqs[seq_id] = reverse_complement(triplicate_seq[limits[0]:limits[1]])
+        else:
+            triplicate_seq = contig_seq+contig_seq+contig_seq
+            if coords[0]<coords[1]: # positive strand
+                if not is_circular:
+                    limits = [max(0, coords[0]-1-upstream_bases), min(coords[1]+downstream_bases, len(contig_seq))]
+                    extracted_seqs[seq_id] = contig_seq[limits[0]:limits[1]]
+                elif is_circular:
+                    limits = [max(coords[1], coords[0]-1-upstream_bases+len(contig_seq)), min(coords[0]+2*len(contig_seq), coords[1]+downstream_bases+len(contig_seq))]
+                    extracted_seqs[seq_id] = triplicate_seq[limits[0]:limits[1]]
+            elif coords[0]>coords[1]: # negative strand
+                if not is_circular: # also put in a max thing here
+                    limits = [max(0, coords[1]-1-downstream_bases), min(coords[0]+upstream_bases, len(contig_seq))]
+                    extracted_seqs[seq_id] = reverse_complement(contig_seq[limits[0]:limits[1]])
+                elif is_circular:
+                    limits = [max(coords[0], coords[1]-1-downstream_bases+len(contig_seq)), min(coords[1]+2*len(contig_seq), coords[0]+upstream_bases+len(contig_seq))]
+                    extracted_seqs[seq_id] = reverse_complement(triplicate_seq[limits[0]:limits[1]])
     return extracted_seqs
 
 def main():
@@ -141,17 +145,17 @@ def main():
     print('gene length is: ', str(gene_length))
 
     results = blast_search(gene_fasta, input_fasta)
-    extractions = extract_regions(input_fasta, results, is_circular=args.circular, upstream_bases=int(args.upstream), downstream_bases=int(args.downstream))
+    extractions = extract_regions(input_fasta, results, gene_length=gene_length, is_circular=args.circular, upstream_bases=int(args.upstream), downstream_bases=int(args.downstream))
     with open(output_fasta, 'w') as output_file:
         for k, v in extractions.items():
-            print(k+',', len(v)-gene_length, 'bases extracted around gene.')
+            print(k+',', len(v)-gene_length, 'bases extracted around gene', '('+str(len(v))+' total)')
             if args.complete==False:
-                output_file.write('>%s\n%s\n' % (k, v))
+                output_file.write('>%s %sbp\n%s\n' % (k, str(len(v)), v))
                 print("...writing to file.")
             elif len(v)>(int(args.upstream)+gene_length+int(args.downstream)-1):
-                if "n" not in v:
+                if "n" not in v and "N" not in v: # check for ambiguous characters
                     print("...writing to file.")
-                    output_file.write('>%s\n%s\n' % (k, v))
+                    output_file.write('>%s %sbp\n%s\n' % (k, str(len(v)), v))
 
 if __name__ == "__main__":
     main()
