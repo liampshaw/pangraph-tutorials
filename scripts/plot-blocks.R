@@ -12,7 +12,8 @@ args = commandArgs(trailingOnly=TRUE)
 # 4 - output pdf
 
 # Genome blocks approach
-genome.blocks <- read.csv(args[1], header=T, stringsAsFactors = F)
+genome.blocks <- read.csv(args[1], header=T, stringsAsFactors = F,
+				                          colClasses=c("block"="character"))
 #colnames(genome.blocks) <- c("genome", "block", "strand", "start", "end", "colour")
 genome.blocks$forward <- ifelse(genome.blocks$strand=="+", TRUE, FALSE)
 block.counts <- table(genome.blocks$block)
